@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -47,7 +48,7 @@ public class HardwarePushbot
 
     public Servo spinner;
 
-
+    BNO055IMU imu;
 
 
 
@@ -94,6 +95,26 @@ public class HardwarePushbot
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO0155IMUCalibration.json";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        imu = hwMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+    }
+
+    public void setMotorPower (double left, double right) {
+        this.left.setPower(left);
+        this.right.setPower(right);
+    }
+
+    public void setAllPower(double p) {
+        setMotorPower(p,p);
     }
  }
 
