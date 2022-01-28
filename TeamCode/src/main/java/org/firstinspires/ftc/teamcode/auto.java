@@ -52,7 +52,7 @@ public class auto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     HardwarePushbot hardware = new HardwarePushbot();
 
-    final int ticks = 500;
+    final int ticks = 537;
     double circumference = 3.14*2.5;
 
     private Orientation lastAngles = new Orientation();
@@ -73,9 +73,6 @@ public class auto extends LinearOpMode {
         parameters.loggingEnabled      = false;
 
 
-
-
-
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -88,10 +85,10 @@ public class auto extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            driveForwardOrBackward(.5, 10);
-
+            driveForwardOrBackward(.2, 10);
             turnPID(90);
-            stop();
+
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -214,7 +211,7 @@ public class auto extends LinearOpMode {
     }
 
     void turnToPID (double targetAngle) {
-        TurnPIDController pid = new TurnPIDController(targetAngle, .05, 0, 0.1);
+        TurnPIDController pid = new TurnPIDController(targetAngle, .05, 0, 0.003);
         while (opModeIsActive() && Math.abs(targetAngle - getAbsoluteAngle()) > 1) {
             double motorPower = pid.update(getAbsoluteAngle());
             hardware.setMotorPower(motorPower, -motorPower);
