@@ -72,8 +72,8 @@ public class controller extends LinearOpMode {
             double y = -gamepad1.left_stick_y;
             double x = -gamepad1.left_stick_x;
 
-            hardware.left.setPower(y + x);
-            hardware.right.setPower(y - x);
+            hardware.left.setPower((y + x)/2);
+            hardware.right.setPower((y - x)/2);
 
 
             // arm up and down
@@ -88,9 +88,9 @@ public class controller extends LinearOpMode {
 
 
             // intake
-            if (gamepad1.left_trigger > 0) {
+            if (gamepad1.right_trigger > 0) {
                 hardware.intake.setPower(1);
-            } else if (gamepad1.right_trigger > 0) {
+            } else if (gamepad1.left_trigger > 0) {
                 hardware.intake.setPower(-1);
             } else {
                 hardware.intake.setPower(0);

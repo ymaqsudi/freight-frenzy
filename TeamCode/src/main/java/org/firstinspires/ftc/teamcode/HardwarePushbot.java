@@ -89,8 +89,8 @@ public class HardwarePushbot
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
 
-        right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
-        left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -99,7 +99,7 @@ public class HardwarePushbot
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO0155IMUCalibration.json";
         parameters.loggingEnabled = true;

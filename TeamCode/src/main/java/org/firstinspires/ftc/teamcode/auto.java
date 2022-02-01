@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -44,7 +46,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-
+@Config
 @Autonomous(name="auto", group="Linear Opmode")
 public class auto extends LinearOpMode {
 
@@ -52,11 +54,15 @@ public class auto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     HardwarePushbot hardware = new HardwarePushbot();
 
-    final int ticks = 537;
+    final int ticks = 500;
     double circumference = 3.14*2.5;
 
     private Orientation lastAngles = new Orientation();
     private double currAngle = 0.0;
+
+
+    FtcDashboard dashboard;
+
 
     @Override
     public void runOpMode() {
@@ -72,6 +78,10 @@ public class auto extends LinearOpMode {
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled      = false;
 
+        dashboard = FtcDashboard.getInstance();
+
+
+
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -85,8 +95,7 @@ public class auto extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            driveForwardOrBackward(.2, 10);
-            turnPID(90);
+            spinCar();
 
 
 
@@ -98,18 +107,25 @@ public class auto extends LinearOpMode {
 
 
 
-    public void armUp() {
+    public void armUpLevel2() {
         hardware.arm.setPower(.5);
-        sleep(3000);
-        if (hardware.arm.isBusy()) {
-
-        }
+        sleep(500);
         hardware.arm.setPower(0.1);
+    }
+
+    public void armUpLevel1() {
+        hardware.arm.setPower(.5);
+        sleep(175);
+        hardware.arm.setPower(0.1);
+    }
+
+    public void spinCar() {
+        hardware.spinner.setPosition(500);
     }
 
     public void armDown() {
         hardware.arm.setPower(.01);
-        sleep(500);
+        sleep(3000);
         hardware.arm.setPower(0.1);
     }
 
@@ -136,7 +152,11 @@ public class auto extends LinearOpMode {
 
         hardware.left.setPower(0);
         hardware.right.setPower(0);
+
+        hardware.left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        hardware.right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
 
     public void intake(int time) {
         hardware.intake.setPower(1);
@@ -190,20 +210,6 @@ public class auto extends LinearOpMode {
         }
 
         hardware.setAllPower(0);
-    }
-
-    public void turnTo(double degrees) {
-        Orientation orientation = hardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        double error = degrees - orientation.firstAngle;
-
-        if (error > 180) {
-            error -= 360;
-        } else if (error < -180) {
-            error += 360;
-        }
-
-        turn (error);
     }
 
     public double getAbsoluteAngle() {

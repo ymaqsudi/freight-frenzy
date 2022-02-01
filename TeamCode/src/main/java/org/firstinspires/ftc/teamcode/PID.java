@@ -74,14 +74,18 @@ public class PID extends LinearOpMode {
 
     public double PIDControl (double reference, double state) {
         double error = angleWrap(reference - state);
-        integralSum += error * timer.seconds();
-        double derivative = (error - lastError) / timer.seconds();
-        lastError = error;
+        while (Math.abs(error) <= 10) {
+            integralSum += error * timer.seconds();
+            double derivative = (error - lastError) / timer.seconds();
+            lastError = error;
 
-        timer.reset();
+            timer.reset();
 
-        double output = (error * kP) + (derivative * kD) + (integralSum * kI);
-        return output;
+            return (error * kP) + (derivative * kD) + (integralSum * kI);
+        }
+
+        return 0;
+
     }
 
     //
