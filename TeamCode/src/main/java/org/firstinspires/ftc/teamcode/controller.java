@@ -51,6 +51,7 @@ public class controller extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     HardwarePushbot hardware = new HardwarePushbot();
+    auto_methods methods = new auto_methods(hardware);
 
 
     @Override
@@ -62,8 +63,6 @@ public class controller extends LinearOpMode {
 
         hardware.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
-
         waitForStart();
 
         runtime.reset();
@@ -72,9 +71,14 @@ public class controller extends LinearOpMode {
             double y = -gamepad1.left_stick_y;
             double x = -gamepad1.left_stick_x;
 
-            hardware.left.setPower((y + x)/2);
-            hardware.right.setPower((y - x)/2);
-
+            // manual mode
+            if (!gamepad1.x) {
+                hardware.left.setPower((y + x)/2);
+                hardware.right.setPower((y - x)/2);
+            } else {
+                hardware.left.setPower((y + x)/10);
+                hardware.right.setPower((y - x)/10);
+            }
 
             // arm up and down
             if (gamepad1.right_stick_y < 0) {
@@ -85,7 +89,6 @@ public class controller extends LinearOpMode {
             else {
                 hardware.arm.setPower(0.1);
             }
-
 
             // intake
             if (gamepad1.right_trigger > 0) {
@@ -105,17 +108,12 @@ public class controller extends LinearOpMode {
                 hardware.spinner.setPosition(0.5);
             }
 
-            // top level
             if (gamepad1.a) {
-                hardware.arm.setPower(.4);
-                sleep(300);
-            } else if (gamepad1.b) {
-                hardware.arm.setPower(.4);
-                sleep (500);
-            } else if (gamepad1.y) {
-                hardware.arm.setPower(.4);
-                sleep(500);
+                // move 4 bar encoder up to top level
+                methods.barUp(.5, 2);
+
             }
+
 
             // information to print to the phones
             telemetry.addData("Status", "Run Time: " + runtime.toString());

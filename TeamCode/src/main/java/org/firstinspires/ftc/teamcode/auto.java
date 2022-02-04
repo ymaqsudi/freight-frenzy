@@ -52,16 +52,10 @@ public class auto extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+
     HardwarePushbot hardware = new HardwarePushbot();
+    auto_methods methods = new auto_methods(hardware);
 
-    final int ticks = 500;
-    double circumference = 3.14*2.5;
-
-    private Orientation lastAngles = new Orientation();
-    private double currAngle = 0.0;
-
-
-    FtcDashboard dashboard;
 
 
     @Override
@@ -78,7 +72,6 @@ public class auto extends LinearOpMode {
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled      = false;
 
-        dashboard = FtcDashboard.getInstance();
 
 
 
@@ -95,9 +88,7 @@ public class auto extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            spinCar();
-
-
+            methods.driveForwardOrBackward(.2, 10);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -107,127 +98,6 @@ public class auto extends LinearOpMode {
 
 
 
-    public void armUpLevel2() {
-        hardware.arm.setPower(.5);
-        sleep(500);
-        hardware.arm.setPower(0.1);
-    }
-
-    public void armUpLevel1() {
-        hardware.arm.setPower(.5);
-        sleep(175);
-        hardware.arm.setPower(0.1);
-    }
-
-    public void spinCar() {
-        hardware.spinner.setPosition(500);
-    }
-
-    public void armDown() {
-        hardware.arm.setPower(.01);
-        sleep(3000);
-        hardware.arm.setPower(0.1);
-    }
-
-    public void driveForwardOrBackward(double power, double distance) {
-        hardware.left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hardware.right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        double rotationsNeeded = distance/circumference;
-        int encoderDrivingTarget = (int) (rotationsNeeded * ticks);
-
-        hardware.left.setTargetPosition(encoderDrivingTarget);
-        hardware.right.setTargetPosition(encoderDrivingTarget);
-
-        hardware.left.setPower(power);
-        hardware.right.setPower(power);
-
-        hardware.left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        hardware.right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while (hardware.left.isBusy() || hardware.right.isBusy()) {
-            // do nothing while running
-            telemetry.addData("Path", "Driving");
-        }
-
-        hardware.left.setPower(0);
-        hardware.right.setPower(0);
-
-        hardware.left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        hardware.right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-
-    public void intake(int time) {
-        hardware.intake.setPower(1);
-        sleep(time * 1000);
-    }
-
-    public void outtake(int time) {
-        hardware.intake.setPower(-1);
-        sleep(time * 1000);
-    }
-
-    public void resetAngle() {
-        lastAngles = hardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        currAngle = 0;
-    }
-
-    public double getAngle() {
-        Orientation orientation = hardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        double deltaAngle = orientation.firstAngle - lastAngles.firstAngle;
-
-
-        // Normalizing angle
-        if (deltaAngle > 180) {
-            deltaAngle -= 360;
-        } else if (deltaAngle <= -180) {
-            deltaAngle += 360;
-        }
-
-        currAngle += deltaAngle;
-        lastAngles = orientation;
-
-        telemetry.addData("gyro", orientation.firstAngle);
-
-        return currAngle;
-
-    }
-
-    public void turn (double degrees) {
-
-        resetAngle();
-
-        double error = degrees;
-
-        while (opModeIsActive() && Math.abs(error) > 2) {
-            double motorPower = (error < 0 ? -0.3: 0.3);
-            hardware.setMotorPower(motorPower, -motorPower);
-            error = degrees - getAngle();
-            telemetry.addData("error", error);
-            telemetry.update();
-        }
-
-        hardware.setAllPower(0);
-    }
-
-    public double getAbsoluteAngle() {
-        return hardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-    }
-
-    void turnToPID (double targetAngle) {
-        TurnPIDController pid = new TurnPIDController(targetAngle, .05, 0, 0.003);
-        while (opModeIsActive() && Math.abs(targetAngle - getAbsoluteAngle()) > 1) {
-            double motorPower = pid.update(getAbsoluteAngle());
-            hardware.setMotorPower(motorPower, -motorPower);
-        }
-        hardware.setAllPower(0);
-    }
-
-    void turnPID (double degrees) {
-        turnToPID(degrees + getAbsoluteAngle());
-    }
 
 
 }
